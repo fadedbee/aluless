@@ -23,24 +23,25 @@ The data path is:
 <pre>
 |<-ROM<=PC
 |       ^^
+|-------)|
 |-->L---)|
 |-->M---||
 |-->H--|||
-       |||
-       vvv
-    X<>MEM
+|      |||
+|<->X  vvv
+|<---->MEM
 </pre>
 
 The eight-step sequence is:
 
 <pre>
-bus[0,0,rom[PC++]]  -> L
-bus[0,0,rom[PC++]]  -> M
-bus[0,0,rom[PC++]]  -> H
+bus[b0,0,rom[PC++]]  -> L
+bus[b0,0,rom[PC++]]  -> M
+rom[PC++]  -> H
 bus[HML]  -> X
-bus[0,0,rom[PC++]]  -> L
-bus[0,0,rom[PC++]]  -> M
-bus[0,0,rom[PC++]]  -> H
+bus[b0,0,rom[PC++]]  -> L
+bus[b0,0,rom[PC++]]  -> M
+bus[rom[PC++]]  -> H
 X -> bus[HML] ; JMP ML iff X>=0
 </pre>
 
