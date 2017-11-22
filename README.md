@@ -28,5 +28,5 @@ The data path is:
 |-->H---))|
         |||
         vvv
-    D<->MEM
+    X<->MEM
 </pre>
