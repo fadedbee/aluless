@@ -18,3 +18,15 @@ f00000 - f7ffff : reserved
 
 The ROM contains 16 arithmetic tables, each with two one-byte arguments.
 
+The data path is:
+
+<pre>
+|<-ROM<=PC
+|       ^^
+|-->L---||
+|-->M---)|
+|-->H---))|
+        |||
+        vvv
+    D<->MEM
+</pre>
