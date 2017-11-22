@@ -30,3 +30,18 @@ The data path is:
        vvv
     X<>MEM
 </pre>
+
+The eight-step sequence is:
+
+<pre>
+bus[0,0,rom[PC++]]  -> L
+bus[0,0,rom[PC++]]  -> M
+bus[0,0,rom[PC++]]  -> H
+bus[HML]  -> X
+bus[0,0,rom[PC++]]  -> L
+bus[0,0,rom[PC++]]  -> M
+bus[0,0,rom[PC++]]  -> H
+X -> bus[HML] ; JMP ML iff X>=0
+</pre>
+
+TODO: would changing to an eight-byte instruction simplify things?
