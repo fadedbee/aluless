@@ -4,15 +4,15 @@ An OISC homebrew CPU.
 <pre>
     |----C
     ||--P|
- |<>RAM ||
+ |&lt;&gt;RAM ||
  |  ||| ||
- |<TROM ||
+ |&lt;-ROM ||
  |  ||| ||
- |->L|| ||
- |-->H| ||
- |--->X || 
+ |-&gt;L|| ||
+ |--&gt;H| ||
+ |---&gt;X || 
  |    | ||
- |<---KROM
+ |&lt;---KROM
       | ||
       SROM
 
