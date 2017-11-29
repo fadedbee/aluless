@@ -1,5 +1,5 @@
 # Aluless
-An OISC homebrew CPU.
+A homebrew CPU.
 
 <pre>
      0-&gt;P
@@ -24,6 +24,14 @@ Inspiration:
 - I was following http://www.homebrewcpuring.org/
 - I saw a 4 bit CPU with 11 chips, and thought that I could do more with 11 chips.  http://minnie.tuhs.org/Programs/CrazySmallCPU/index.html
 
+Parts:
+- `P` is a 4-bit counter.
+- `T`, `L`, `H`, and `X` are 8-bit flip-flops. 
+- `z` are 8 low-value resistors.
+- `uROM` is a 8KBx16 EPROM holding the microcode.
+- `RAM` is a 512KBx8 static RAM.
+- `ROM` is a 8MBx8 EPROM holding artithmetic tables and the BIOS.
+
 Signals: 
 - `rdT` read from the Temporary register 
 - `rdM` read from Memory (ROM or RAM)
@@ -38,6 +46,8 @@ Architecture:
 - Aluless is a very simple 8 bit CPU with a 20 bit address bus.
 - It uses only 8 chips, plus and 
 - It uses microcode, where each machine code instruction requires 10-20 micro-ops to execute.  This is not fast.
+- All arithmetic is done by looking up answers in memory.
+  - New arithmetic instructions can be coded, just by adding tables of answers in RAM.
 - Each microcode instruction is 16 bits wide.
   - The lower byte holds a literal value.
   - The upper byte holds the 8 signal values.
@@ -45,4 +55,8 @@ Architecture:
     - One to six of write signals must be active (low).
   - Normally, each microcode instruction is repeated in the microcode ROM `uROM`.  If the high bit of the `L` register is clear, the first instruction is selected, if the high bit of the `L` refister is set, the second instruction is selected.  Repeating each instruction makes it independent of that value.
     - A few microcode instructions are not repeated, this allow the code to perform different operations depending upon `L`, particularly branching. 
-
+- The eXtened register contains:
+  - bits 7-6: reserved
+  - bit 5:    RAM select (low)
+  - bit 4:    ROM select (low)
+  - bits 3-0: top four bits of address bus
