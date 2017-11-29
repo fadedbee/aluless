@@ -37,9 +37,10 @@ Parts:
 Signals: 
 - `rdT` read from the Temporary register 
 - `rdM` read from Memory (ROM or RAM)
+- default: read Literal value from `uROM`
 - `wrT` write to the Temporary register
 - `wrM` write to Memory (RAM)
-- `wrI` write the High Register to the Instruction register, and zero the Phase counter
+- `wrI` write the value in the High Register to the Instruction register, and zero the Phase counter
 - `wrL` write to the Low register
 - `wrH` write to the High register
 - `wrX` write to the eXtended register
