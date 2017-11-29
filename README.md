@@ -2,6 +2,7 @@
 A homebrew CPU.
 
 <pre>
+     C
      0-&gt;P
  |&lt;-&gt;T  |
  |-z--uROM
@@ -22,9 +23,10 @@ A homebrew CPU.
 
 Inspiration:
 - I was following http://www.homebrewcpuring.org/
-- I saw a 4 bit CPU with 11 chips, and thought that I could do more with 11 chips.  http://minnie.tuhs.org/Programs/CrazySmallCPU/index.html
+- I saw a 4-bit CPU with 11 chips http://minnie.tuhs.org/Programs/CrazySmallCPU/index.html but thought that I could do more, so here's an 8-bit CPU with a 20-bit address bus, accessing 512KB of RAM, done in 9 chips.
 
 Parts:
+- `C` is an 555 timer, generating the clock signal.
 - `P` is a 4-bit counter.
 - `T`, `L`, `H`, and `X` are 8-bit flip-flops. 
 - `z` are 8 low-value resistors.
