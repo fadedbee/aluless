@@ -58,6 +58,7 @@ The motherboard contains:
 
 Datapath Schematic
 ------------------
+<pre>
             _____
   ck-->T-->|uCode|--
 |----->I-->| ROM |--
@@ -106,6 +107,7 @@ Datapath Schematic
 |<>|OUT|
 |  |___|
 |       
+</pre>
 
 CPU signals
 -----------
