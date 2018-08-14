@@ -35,7 +35,7 @@ Instead of this being a true RISC CPU, it is heavily microcoded abomination, tak
 
 Instead, Aluless has an 8 bit data path and XORs the two low address bits to allow microcode to form byte addresses from aligned word addresses.
 
-* Conditiona execution of branches would need chips.
+* Conditional execution of branches would need yet more chips.
 
 Instead, bit 7 of the C register is wired to the address bit 0 of the microcode ROM.  Most microcode is duplicated on odd and even addresses, but where it differs it allows conditional execution.
 
@@ -112,6 +112,7 @@ Datapath Schematic
 CPU signals
 -----------
 
+<pre>
 15..         ..0
 IlknNrRBCmMvvvvv
 IlknNrRBCmM---xx
@@ -119,9 +120,22 @@ IlknNrRBCmM---xx
 vvvvv: a value between -16 and 15
    xx: a value, to XOR addresses, of between 0 and 3
 
+T' = T + 1
+uaddr = (I << 5) | (T << 1) | (C >> 7)
+xor = (ucode[uaddr] & 0x0003)
+maddr = (C << 16) | (B << 8) | (A ^ xor)
 I: I' = bus, T' = 0
 l: bus = ucode[uaddr] & 0x001F
 k: raddr = ucode[uaddr] & 0x001F
+n: raddr = N ^ xor
+N: N' = bus
+r: bus = reg[raddr]
+R: reg[raddr]' = bus
+B: A' = B, B' = bus
+C: C' = bus
+m: bus = mem[maddr]
+M: mem[maddr] = bus
+</pre>
 
 
 
