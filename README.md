@@ -1,66 +1,126 @@
-# Aluless
-A homebrew CPU.
+Aluless
+-------
 
-<pre>
-     C
-     0-&gt;P
- |&lt;-&gt;T  |
- |-z--uROM
- |     | |
- |----&gt;L |
- |---&gt;H| |
- |--&gt;X|| |
- |   ||| |
- |&lt;-&gt;RAM |
- |   ||| |
- |&lt;--ROM |
-      |-&gt;I
+Aluless is the smallest homebrew CPU I could design to execute RISC-V rv32i assembly.  It is made of 74hcXXX chips, static RAM and ROM.
 
- 0   12345
-   buses
-    
-</pre>
+My target was ten chips for the CPU and ten for the motherboard.
 
-Inspiration:
-- I was following http://www.homebrewcpuring.org/
-- I saw a 4-bit CPU with 11 chips http://minnie.tuhs.org/Programs/CrazySmallCPU/index.html but thought that I could do more, so here's an 8-bit CPU with a 20-bit address bus, accessing 512KB of RAM, done in 9 chips.
+I chose the rv32i instruction set as it was small and looks to have increasing compiler support.
 
-Parts:
-- `C` is an 555 timer, generating the clock signal.
-- `P` is a 4-bit counter.
-- `T`, `L`, `H`, and `X` are 8-bit flip-flops. 
-- `z` are 8 low-value resistors.
-- `uROM` is a 8KBx16 EPROM holding the microcode.
-- `RAM` is a 512KBx8 static RAM.
-- `ROM` is a 1MBx8 EPROM holding artithmetic tables and the BIOS.
+Aluless uses a custom assembler, as its machine code differs from rv32i machine (the assembly language is identical).  Some rv32i instructions assemble into multiple Aluless instructions, if immediates are outside of Aluless's eight-bit range.
 
-Signals: 
-- `rdT` read from the Temporary register 
-- `rdM` read from Memory (ROM or RAM)
-- default: read Literal value from `uROM`
-- `wrT` write to the Temporary register
-- `wrM` write to Memory (RAM)
-- `wrI` write the value in the High Register to the Instruction register, and zero the Phase counter
-- `wrL` write to the Low register
-- `wrH` write to the High register
-- `wrX` write to the eXtended register
 
-Architecture:
-- Aluless is a very simple 8 bit CPU with a 20 bit address bus.
-- It uses only 8 chips, plus and 
-- It uses microcode, where each machine code instruction requires 10-20 micro-ops to execute.  This is not fast.
-- All arithmetic is done by looking up answers in memory.
-  - New arithmetic instructions can be coded, just by adding tables of answers in RAM.
-- Each microcode instruction is 16 bits wide.
-  - The lower byte holds a literal value.
-  - The upper byte holds the 8 signal values.
-    - Either `rdT`, `rdM` must be active (low), or neither, but not both.  If neither is active, the data bus reads as the literal value (from the lower byte).
-    - One to six of write signals must be active (low).
-  - Normally, each microcode instruction is repeated in the microcode ROM `uROM`.  If the high bit of the `L` register is clear, the first instruction is selected, if the high bit of the `L` refister is set, the second instruction is selected.  Repeating each instruction makes it independent of that value.
-    - A few microcode instructions are not repeated, this allow the code to perform different operations depending upon `L`, particularly branching. 
-  - There are upto 128 different opcodes.  The high bit is used to determines whether the next instruction should be fetched from the BIOS or from RAM.
-- The eXtended register contains:
-  - bit 7-6: reserved
-  - bit 5:   RAM select (low)
-  - bit 4:   ROM select (low)
-  - bit 3-0: top four bits of address bus
+Why
+---
+
+I wanted to design a CPU which would run code which I could write in C.  I thought I might learn something.  If I design another CPU, it will be efficient and therefore need me to write a compiler.
+
+
+Design
+------
+
+* The registers for rv32i would need 128 74hc574s.  That was too much soldering.
+
+Instead, the register values are all stored in a single static RAM.
+
+* The ALU would likewise need dozens of chips.
+
+Instead, there is no ALU.  Arithmetic and logic results are stored in a 1Mb ROM mapped into main memory.
+
+* Thirdly, the logic would need dozens of chips.
+
+Instead of this being a true RISC CPU, it is heavily microcoded abomination, taking tens of cycles to execute each rv32i instruction.
+
+* A 32-bit data path would require many chips, plus additional chips to allow half-word and byte access.
+
+Instead, Aluless has an 8 bit data path and XORs the two low address bits to allow microcode to form byte addresses from aligned word addresses.
+
+* Conditiona execution of branches would need chips.
+
+Instead, bit 7 of the C register is wired to the address bit 0 of the microcode ROM.  Most microcode is duplicated on odd and even addresses, but where it differs it allows conditional execution.
+
+
+Motherboard
+-----------
+
+The Aluless CPU is linked to a motherboard via a bus.  5V, GND, d7-0, a22-0. 
+
+The motherboard contains:
+
+* 8kB of boot ROM at 0x000000-0x002000
+* 512Kb of static RAM at 0x400000-0x47FFFF
+* reserved space between 0x500000-0xCFFFFF
+* a one-byte input port at 0xD-----
+* a one-byte output port at 0xE-----
+* 1Mb of ALU ROM at 0xF00000-0xFFFFFF
+* an address decoder which decodes a22-a20 to 8 CE# signals.
+
+
+Datapath Schematic
+------------------
+            _____
+  ck-->T-->|uCode|--
+|----->I-->| ROM |--
+|<-----l-+-|_____|--
+|        |      ^
+|        k      .
+|->N-----+      .
+|       xor     .
+|        |      .
+|    ____v___   .
+|<->|Register|  .
+|   |  SRAM  |  .
+|   |________|  .
+|               .
+|-------------->C
+|-------->B->A  |
+|         |  |  |
+|         | xor |
+|         |  |  |
+
+|         |  |  |   _______
+|         |  |  |  |Address|--
+|         |  |  |->|Decoder|--
+|   ___   |  |  |  |_______|--
+|  |   |<-------+   
+|<-|ROM|<-+  |  |
+|  |___|<----+  |
+|         |  |  |
+|   ___   |  |  |
+|  |ALU|<-------+
+|<-|ROM|<-+  |  |
+|  |___|<----+  |
+|         |  |  |
+|   ___   |  |  |
+|  |   |<-------+
+|<>|RAM|<-+  |  
+|  |___|<----+  
+|       
+|   __ 
+|  |  |
+|<-|IN|
+|  |__|
+|       
+|   ___ 
+|  |   |
+|<>|OUT|
+|  |___|
+|       
+
+CPU signals
+-----------
+
+15..         ..0
+IlknNrRBCmMvvvvv
+IlknNrRBCmM---xx
+
+vvvvv: a value between -16 and 15
+   xx: a value, to XOR addresses, of between 0 and 3
+
+I: I' = bus, T' = 0
+l: bus = ucode[uaddr] & 0x001F
+k: raddr = ucode[uaddr] & 0x001F
+
+
+
+
