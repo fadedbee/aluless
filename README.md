@@ -123,10 +123,12 @@ vvvvv: a value between -16 and 15
 T' = T + 1
 uaddr = (I << 5) | (T << 1) | (C >> 7)
 xor = (ucode[uaddr] & 0x0003)
+v = ucode[uaddr] & 0x001F
+if (v & 0x10) then v |= 0xE0 // sign extend
 maddr = (C << 16) | (B << 8) | (A ^ xor)
 I: I' = bus, T' = 0
-l: bus = ucode[uaddr] & 0x001F
-k: raddr = ucode[uaddr] & 0x001F
+l: bus = v
+k: raddr = v
 n: raddr = N ^ xor
 N: N' = bus
 r: bus = reg[raddr]
