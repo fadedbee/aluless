@@ -58,7 +58,7 @@ macros
 
 
 
-INCPC4A (-1):
+INCPC4A:
 B' = 4
 N' = PC
 B' = reg[N]
@@ -69,7 +69,7 @@ C' = OP_NE
 C' = mem[CBA]
 if C < 0 then fetch else
 B' = 1
-B' = reg[N ^ 1]
+B' = reg[N.1]
 C' = OP_ADD
 reg[N ^ 1] = mem[CBA]
 B' = 0
@@ -77,26 +77,56 @@ C' = OP_NE
 C' = mem[CBA]
 if C < 0 then FETCH else
 I' = INCPC4B
-B' = reg[N ^ 2]
+B' = reg[N.2]
 B' = 1
 C' = OP_ADD
 reg[N ^ 2] = mem[CBA];
 I' = FETCH
 
-FETCH (0):
+FETCH:
 N' = PC0
 B' = reg[N]
-B' = reg[N ^ 1]
-C' = reg[N ^ 2]
-N' = OP
-reg[N ^ 1]' = mem[CBA ^ 1]
-reg[N ^ 2]' = mem[CBA ^ 2]
-reg[N ^ 3]' = mem[CBA ^ 3]
+B' = reg[N.1]
+C' = reg[N.2]
+N' = INST
+reg[N.1]' = mem[CBA^1]
+reg[N.2]' = mem[CBA^2]
+reg[N.3]' = mem[CBA^3]
 if reg[N.3] < 0 then NOP else I' = mem[CBA]
 
+LI: dst imm0 imm1
+N' = INST
+B' = reg[N.2]
+C' = OP_B
+N' = reg[N.1]
+reg[N.0] = mem[CBA]
+N' = INST
+B' = reg[N.3]
+N' = reg[N.1]
+reg[N.1] = mem[CBA]
+B' = reg[0]
+reg[N.2] = mem[CBA]
+reg[N.3] = mem[CBA]
+
+LUI: dst imm2 imm3
+N' = INST
+B' = reg[N.2]
+C' = OP_B
+N' = reg[N.1]
+reg[N.2] = mem[CBA]
+N' = INST
+B' = reg[N.3]
+N' = reg[N.1]
+reg[N.3] = mem[CBA]
+
+ADD: dst src0 src1
 
 
 
+
+
+ADDI
+LI
 SLTI
 SLTIU
 ANDI
