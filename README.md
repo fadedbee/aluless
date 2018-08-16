@@ -1,7 +1,7 @@
 Aluless
 -------
 
-Aluless is the smallest homebrew CPU I could design to execute RISC-V rv32i assembly.  It is made of 74hcXXX chips, static RAM and ROM.
+Aluless is the smallest homebrew CPU to execute RISC-V rv32i assembly.  It is made of 74hcXXX chips, static RAM and ROM.
 
 My target was ten chips for the CPU and ten for the motherboard.
 
@@ -13,7 +13,7 @@ Aluless uses a custom assembler, as its machine code differs from rv32i machine 
 Why
 ---
 
-I wanted to design a CPU which would run code which I could write in C.  I thought I might learn something.  If I design another CPU, it will be efficient and therefore need me to write a compiler.
+I wanted to design a CPU which would run code which I could write in C.  I thought I might learn something.
 
 
 Design
@@ -48,11 +48,11 @@ The Aluless CPU is linked to a motherboard via a bus.  5V, GND, d7-0, a22-0.
 The motherboard contains:
 
 * 8kB of boot ROM at 0x000000-0x002000
-* 512Kb of static RAM at 0x400000-0x47FFFF
-* reserved space between 0x500000-0xCFFFFF
+* 512Kb of static RAM at 0x100000-0x17FFFF
+* reserved space between 0x200000-0xCFFFFF
 * a one-byte input port at 0xD-----
 * a one-byte output port at 0xE-----
-* 1Mb of ALU ROM at 0xF00000-0xFFFFFF
+* 1Mb of ALU ROM at 0xF00000-0FFFFFFF
 * an address decoder which decodes a22-a20 to 8 CE# signals.
 
 
@@ -62,24 +62,23 @@ Datapath Schematic
             _____
   ck-->T-->|uCode|--
 |----->I-->| ROM |--
-|<-----l-+-|_____|--
-|        |      ^
-|        k      .
-|->N-----+      .
-|       xor     .
+|<-----v---|_____|--
+|               ^
+|---->N--+      .
 |        |      .
 |    ____v___   .
 |<->|Register|  .
 |   |  SRAM  |  .
 |   |________|  .
-|               .
-|-------------->C
-|-------->B->A  |
+|               
+|----------->H->L
+|-------->Z  |  |
 |         |  |  |
-|         | xor |
+|         |  | xor
 |         |  |  |
 
 |         |  |  |   _______
+|         |  |  |  |a22-a20|
 |         |  |  |  |Address|--
 |         |  |  |->|Decoder|--
 |   ___   |  |  |  |_______|--
@@ -88,15 +87,15 @@ Datapath Schematic
 |  |___|<----+  |
 |         |  |  |
 |   ___   |  |  |
-|  |ALU|<-------+
-|<-|ROM|<-+  |  |
+|  |   |<-------+
+|<>|RAM|<-+  |  |
 |  |___|<----+  |
 |         |  |  |
 |   ___   |  |  |
-|  |   |<-------+
-|<>|RAM|<-+  |  
+|  |ALU|<-------+
+|<-|ROM|<-+  |  
 |  |___|<----+  
-|       
+|           
 |   __ 
 |  |  |
 |<-|IN|
@@ -113,32 +112,12 @@ CPU signals
 -----------
 
 <pre>
-15..         ..0
-IlknNrRBCmMvvvvv
-IlknNrRBCmM---xx
+15..         ..0 
 
-vvvvv: a value between -16 and 15
-   xx: a value, to XOR addresses, of between 0 and 3
+INRZHMvrmxxlllll
 
-T' = T + 1
-uaddr = (I << 5) | (T << 1) | (C >> 7)
-xor = (ucode[uaddr] & 0x0003)
-v = ucode[uaddr] & 0x001F
-if (v & 0x10) then v |= 0xE0 // sign extend
-maddr = (C << 16) | (B << 8) | (A ^ xor)
-I: I' = bus, T' = 0
-l: bus = v
-k: raddr = v
-n: raddr = N ^ xor
-N: N' = bus
-r: bus = reg[raddr]
-R: reg[raddr]' = bus
-B: A' = B, B' = bus
-C: C' = bus
-m: bus = mem[maddr]
-M: mem[maddr] = bus
+  lllll: a value between -16 and 15
+xx     : a value between 0 and 3, xored with the lowest two address bits
 </pre>
-
-
 
 
