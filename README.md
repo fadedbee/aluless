@@ -116,9 +116,9 @@ CPU signals
 
 INRZHMvrmxxlllbb
 
-  lllbb: a value between -16 and 15, when v is low
-     bb: the register byte specifier, between 0 and 3
-xx     : a value between 0 and 3, xored with the lowest two address bits
+         lllllbb: a value between -64 and 63, when v is low
+              bb: the register byte specifier, between 0 and 3
+         xx     : a value between 0 and 3, xored with the lowest two address bits to access the bytes of a word-aligned address
 </pre>
 
 
