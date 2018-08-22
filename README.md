@@ -62,11 +62,11 @@ Datapath Schematic
             _____
   ck-->T-->|uCode|--
 |----->I-->| ROM |--
-|<-----v---|_____|--
-|               ^
-|---->N--+      .
-|        |      .
-|    ____v___   .
+|<-----v--+|_____|--
+|         |     ^
+|---->N-+ |     .
+|       | |     .
+|    ___v_v__   .
 |<->|Register|  .
 |   |  SRAM  |  .
 |   |________|  .
@@ -114,9 +114,10 @@ CPU signals
 <pre>
 15..         ..0 
 
-INRZHMvrmxxlllll
+INRZHMvrmxxlllbb
 
-  lllll: a value between -16 and 15
+  lllbb: a value between -16 and 15, when v is low
+     bb: the register byte specifier, between 0 and 3
 xx     : a value between 0 and 3, xored with the lowest two address bits
 </pre>
 
