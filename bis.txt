@@ -1,0 +1,132 @@
+
+abus     rbus
+LED       LED
+ |<--P-----|
+ |<--S-----|
+ |<--T-----|
+ |   ___   |
+ |->|ALU|->|
+ |  |___|  v
+ |    ^    W
+ |    |    |
+ |    R<---|
+ |   ___   |
+ |->|RAM|<>|
+ |  |___|  |
+ |   ___   |
+ |->|ROM|->|
+ |  |___|  |
+           |
+    C I<---|
+    | |    |
+   _V_V_   |
+  |uCODE|  |
+  |_____|  |
+    | |    |
+    LED   LED
+   ubus  dbus
+
+
+signals (16)
+
+a3
+a2
+a1
+a0
+
+rPwP
+rSwS
+rT
+
+rROM
+rRAM
+rW
+rO
+
+wTwW
+wR
+wRAM
+wIwC
+wN
+
+
+// push instructions (6)
+
+ldi  push(imm)		
+ldsi push(stack[S + imm])
+ldhi push(heap[imm])	
+ldp  push(P)   	
+lds  push(S)
+ldn  push(N)
+
+
+// static instructions (13)
+
+0	nop 	
+1	bri P = P + imm
+2	jpi P = imm
+
+ldh  push(heap[pop])
+
+stsi S = imm       
+stoi O = imm	
+
+inc  push(pop + 1)
+dec  push(pop - 1)
+andi push(pop & imm)
+ori  push(pop or imm)
+xori push(pop xor imm)
+addi push(pop + imm)
+shli push(pop << imm) 	// 0x0E - also does lsr, if arg < 0 or asr right if arg < -64, or rotl if arg >= 64
+
+
+// pop instructions (13)
+
+brilti if pop < imm0 then P = P + imm1
+brieqi if pop = imm0 then P = P + imm1
+br  P = P + pop		
+jmp  P = pop		
+
+call push(P+1), P = imm
+sts  S = pop
+sthi heap[imm] = pop
+stsi stack[S + imm] = pop
+sto  O = pop
+
+and  push(pop & pop)
+or   push(pop or pop)	
+xor  push(pop xor pop)
+add  push(pop + pop)
+sub  push(pop - pop)	
+sbs  push(pop - pop)
+shl  push(pop << pop) 
+
+
+// double-pop instructions (1)
+
+st   heap[pop] = pop
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+

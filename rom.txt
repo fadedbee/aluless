@@ -1,0 +1,97 @@
+
+
+|<-->R
+|    ^
+|    |  _____
+|<-v<+-|uCode|
+|->F-->| ROM |
+|  P-->|_____|
+|  ^
+|  |
+|->X
+|---->H->L
+|
+|<>M
+
+mem map
+
+0x000000-0x02FFFF code and heap
+0x030000-0x07FFFF L + H
+0x040000-0x07FFFF L nand H
+0x050000-0x07FFFF L cmp H  (EQ, NE, LT, LTE, LTS, LTES) 
+0x070000-0x07FF1F L << H (-16..-9 asr, -8..-1 lsr, 0..7 shl)
+
+
+
+
+uops
+
+R[v]=M[XHL]
+R[v]=A[XHL]
+R[v]=M[XHL] H=M[XHL]
+F=R[v]   P=X
+F=v      P=X
+F=M[XHL] P=X
+Z=R[v]
+Z=v
+Z=M[ZYX]
+L=H	H=R[v]
+L=H	H=v
+L=H	H=M[XHL]
+M=R[v]
+M=V[XHL]
+
+if X < 0 then TTT else FFF
+
+
+signals
+
+rR
+rV
+rM
+wR
+wFP
+wX
+wHL
+wM
+
+fetch
+H=r[PC0]
+H=r[PC1]
+X=r[PC2]
+F=m[XHL]
+
+incpc
+H=r[PC0]
+H=1
+X=ADD
+r[PC0]=H=m[XHL]
+H=0
+X=EQ
+X=[XHL]
+if X<0 fetch else H=r[PC1]
+H=1
+X=ADD
+r[PC1]=H=m[XHL]
+H=0
+X=EQ
+X=[XHL]
+if X<0 fetch else incpc_ctnd
+
+incpc ctnd
+H=r[PC1]
+H=1
+X=ADD
+r[PC1]=m[XHL]
+
+jal rD rJ
+li rD imm
+ld rD rS
+op r0 r1 // add sub xor and or shl 
+st rD rS
+
+
+
+
+
+
